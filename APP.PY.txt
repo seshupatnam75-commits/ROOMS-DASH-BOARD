@@ -1,0 +1,31 @@
+import streamlit as st
+import pandas as pd
+import pyodbc 
+
+# పేజీ సెటప్
+st.set_page_config(layout="wide")
+st.title("📊 నా ఉచిత MS Access డ్యాష్‌బోర్డ్")
+
+# 1. MS Access డేటాబేస్ కనెక్షన్
+db_path = "SW.Mdb" # మీ డేటాబేస్ ఫైల్ పేరు ఇక్కడ ఇవ్వండి
+conn_str = f"DRIVER={{Microsoft Access Driver (*.mdb, *.accdb)}};DBQ={db_path};"
+
+try:
+    conn = pyodbc.connect(conn_str)
+    
+    # 2. డేటాను క్వెరీ చేయడం
+    query = "SELECT ACR, OCR, DONA FROM ITEMS"
+    df = pd.read_sql(query, conn)
+    conn.close()
+
+    # 3. డ్యాష్‌బోర్డ్ నంబర్లు (KPIs) చూపించడం
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric(label="AC ROOMS : ", value=f"${df['ACR'].sum():,.2f}")
+    with col2:
+        st.metric(label="ORDINARY ROOMS: ", value=VAL(OCR))
+    with col3:
+        st.metric(label="DONATIONS: ", value=VAL(DONA))
+
+    except Exception as e:
+    st.error(f"డేటాబేస్ కనెక్ట్ కాలేదు. లోపం: {e}")
